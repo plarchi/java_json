@@ -1,0 +1,5 @@
+this is a simple text file
+you should find that it has five lines
+each of varying lengths
+and no dirty data
+which might make it go wrong
