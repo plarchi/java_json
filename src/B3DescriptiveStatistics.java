@@ -2,12 +2,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map.Entry;
-
 import static edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.WordlistTest.TYPE.word;
 
 public class B3DescriptiveStatistics {
     public static void main(String[] args){
-        // Ensure filename is provided as an argument
         if (args.length != 1) {
             System.out.println("Please provide the JSON file name as an argument.");
             System.exit(1);
@@ -61,6 +59,9 @@ public class B3DescriptiveStatistics {
 
     private void outputCountsAsCSV(ConcurrentHashMap<String, Integer> counts, String filename) throws IOException {
         StringBuilder csvOutput = new StringBuilder();
+
+        // Header for CSV
+        csvOutput.append("Word,Count").append(System.lineSeparator());
 
         // Iterate over each CSV content
         for(Entry<String, Integer>entry : counts.entrySet()){
