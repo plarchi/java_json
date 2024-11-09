@@ -23,13 +23,11 @@ public class B3DescriptiveStatistics {
         // Instantiate JSONIOHelper to load JSON data
         JSONIOHelper jsonIO = new JSONIOHelper();
         jsonIO.loadJSON(filename);
-
         // Try to load lemmas; if empty, load from documents instead
         ConcurrentHashMap<String, String> lemmas = jsonIO.getDocumentsFromJSONStructure();
-
         // Counting method
         countWordsInCorpus(lemmas);
-
+        countWordsInDocuments(lemmas);
         // Print directory
         System.out.println("Working directory: " + System.getProperty("user.dir"));
     }
@@ -39,7 +37,6 @@ public class B3DescriptiveStatistics {
 
         for(String value : lemmas.values()){
             String[] words = value.split(" ");
-
             for (String word : words){
                 counts.put(word, counts.getOrDefault(word, 0) + 1);
             }
@@ -50,9 +47,28 @@ public class B3DescriptiveStatistics {
 
         // Output counts as CSV file
         try{
-            outputCountsAsCSV(counts, "D:\\Waitpet_Onedrive\\OneDrive\\Data_Engineering\\MsC_Edinburgh\\Data_Management_Processing\\Coursework2\\DataPipeline_CW2\\word_count.csv");
+            outputCountsAsCSV(counts, "word_count.csv");
         } catch (IOException e) {
             System.out.println("An error occured while saving the CSV file.");
+            e.printStackTrace();
+        }
+    }
+
+    private void countWordsInDocuments(ConcurrentHashMap<String,String> lemmas){
+        ConcurrentHashMap<String, Integer> documentWordCounts = new ConcurrentHashMap<>();
+
+        for(Entry<String, String>entry : lemmas.entrySet()){
+            String[]words = entry.getValue().split(" ");
+            documentWordCounts.put(entry.getKey(), words.length);
+        }
+        documentWordCounts.forEach((doc, count) -> System.out.println(doc + ": " + count));
+
+        // Write to CSV
+        try{
+            outputCountsAsCSV(documentWordCounts, "documentWordCount.csv");
+            System.out.println("Document word counts successfully written to documentWordCount.csv");
+        } catch (IOException e){
+            System.out.println("An error occurred while writing to the file.");
             e.printStackTrace();
         }
     }
