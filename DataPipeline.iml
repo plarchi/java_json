@@ -11,5 +11,6 @@
     <orderEntry type="library" name="cleartk.stanford.corenlp" level="project" />
     <orderEntry type="library" name="edu.stanford.nlp.corenlp" level="project" />
     <orderEntry type="library" name="json-simple-1.1.1" level="project" />
+    <orderEntry type="library" name="cc.mallet" level="project" />
   </component>
 </module>
