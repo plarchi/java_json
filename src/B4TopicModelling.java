@@ -121,6 +121,9 @@ public class B4TopicModelling {
             System.out.println("Topic modeling complete!");
             Object[][] topWords = model.getTopWords(10);
 
+            // New - Save topics to CSV file
+            saveTopicsToCSV(topWords, "topic_modeling_results.csv");
+
             for (int i = 0; i < topWords.length; i++) {
                 System.out.print("Top words in topic " + i + ": ");
                 for (Object word : topWords[i]) {
@@ -130,6 +133,23 @@ public class B4TopicModelling {
             }
         } catch (Exception e) {
             System.out.println("An error occurred during the topic modeling process.");
+            e.printStackTrace();
+        }
+    }
+
+    private void saveTopicsToCSV(Object[][] topWords, String filename) {
+        try (FileWriter writer = new FileWriter(filename)) {
+            writer.write("Topic,TopWords\n");
+            for (int i = 0; i < topWords.length; i++) {
+                StringBuilder line = new StringBuilder("Topic " + i + ",");
+                for (Object word : topWords[i]) {
+                    line.append(word).append(" ");
+                }
+                writer.write(line.toString().trim() + "\n");
+            }
+            System.out.println("Topics successfully saved to " + filename);
+        } catch (IOException e) {
+            System.out.println("An error occurred while saving topics to CSV.");
             e.printStackTrace();
         }
     }

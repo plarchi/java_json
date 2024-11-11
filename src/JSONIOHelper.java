@@ -1,9 +1,13 @@
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 // B3 - JSON Data Handling Block
@@ -15,6 +19,29 @@ public class JSONIOHelper {
     JSONObject documentsObject;
     // B3.1 Part of the JSON datastore containing cleaned (lemmatised) documents
     JSONObject lemmasObject;
+    // New Function - Set to store stop words
+    private Set<String> stopWords;
+
+    // New - Constructor to initialize stop words
+    public JSONIOHelper(){
+        this.stopWords = loadStopWords("stopwords.txt");
+    }
+
+    // New - Method to Load stop words from a file
+    private Set<String> loadStopWords(String filePath) {
+        Set<String> stopWordsSet = new HashSet<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String word;
+            while ((word = br.readLine()) != null) {
+                stopWordsSet.add(word.trim().toLowerCase());
+            }
+            System.out.println("Stop words loaded successfully. Total stop words: " + stopWordsSet.size());
+        } catch (IOException e) {
+            System.out.println("Failed to load stop words. Proceeding without stop word removal.");
+            e.printStackTrace();
+        }
+        return stopWordsSet;
+    }
 
     // B3.2 Method creating an empty datastore structure
     public void createBasicJSONStructure(){
@@ -115,5 +142,16 @@ public class JSONIOHelper {
             lemmas.put(key, (String)lemmasObject.get(key));
         }
         return lemmas;
+    }
+
+    // New - Helper method to filter stop words from text
+    private String filterStopWords(String text) {
+        StringBuilder result = new StringBuilder();
+        for (String word : text.split("\\s+")) {
+            if (!stopWords.contains(word.toLowerCase())) {
+                result.append(word).append(" ");
+            }
+        }
+        return result.toString().trim();
     }
 }
