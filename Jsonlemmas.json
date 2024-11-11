@@ -1,0 +1,36 @@
+{
+    "documents": {
+        "doc1": "technology and innovation are shaping the future",
+        "doc2": "the economy is influenced by both innovation and stability",
+        "doc3": "health and wellness depend on balanced diets and exercise",
+        "doc4": "scientific research provides insights into mental health",
+        "doc5": "the tech industry grows with new advancements in AI and machine learning",
+        "doc6": "fitness and wellness are essential for a balanced life",
+        "doc7": "economic stability depends on policy and innovation",
+        "doc8": "scientists make breakthroughs in artificial intelligence research",
+        "doc9": "mental health awareness is increasing globally",
+        "doc10": "AI is revolutionizing the technology landscape and innovation",
+        "doc11": "nutrition and diets play a significant role in health",
+        "doc12": "machine learning applications are expanding in tech and finance",
+        "doc13": "exercise contributes to both physical and mental health",
+        "doc14": "economic policy shapes global markets and stability",
+        "doc15": "AI and machine learning drive advancements in technology"
+    },
+    "lemmas": {
+        "doc1": "technology innovation shape future",
+        "doc2": "economy influence innovation stability",
+        "doc3": "health wellness depend balance diet exercise",
+        "doc4": "scientific research provide insight mental health",
+        "doc5": "tech industry grow advancement ai machine learning",
+        "doc6": "fitness wellness essential balance life",
+        "doc7": "economic stability depend policy innovation",
+        "doc8": "scientist make breakthrough artificial intelligence research",
+        "doc9": "mental health awareness increase global",
+        "doc10": "ai revolutionize technology landscape innovation",
+        "doc11": "nutrition diet play significant role health",
+        "doc12": "machine learning application expand tech finance",
+        "doc13": "exercise contribute physical mental health",
+        "doc14": "economic policy shape global market stability",
+        "doc15": "ai machine learning drive advancement technology"
+    }
+}
