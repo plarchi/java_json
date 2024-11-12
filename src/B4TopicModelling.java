@@ -1,5 +1,4 @@
 import cc.mallet.pipe.iterator.CsvIterator;
-import cc.mallet.util.*;
 import cc.mallet.pipe.*;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.InstanceList;
@@ -9,7 +8,7 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -42,7 +41,18 @@ public class B4TopicModelling {
             System.out.println("Lemmatised data loaded successfully. Number of documents: " + lemmas.size());
             saveLemmasToFile("topicdata.txt", lemmas);
         }
-        runTopicModelling("topicdata.txt", 5, 2, 50);
+
+        // Scanner - Prompt the user for the custom filename
+        System.out.println("Please input the topic file name for the modeling result in CSV format:");
+        Scanner scanner = new Scanner(System.in);
+        String customFilename = scanner.nextLine().trim();
+
+        // Add .csv if the user input not included
+        if(!customFilename.endsWith(".csv")){
+            customFilename += ".csv";
+        }
+
+        runTopicModelling("topicdata.txt", 5, 2, 50, customFilename);
     }
 
     private void saveLemmasToFile(String flatFile, ConcurrentHashMap<String, String> lemmas) {
@@ -59,7 +69,7 @@ public class B4TopicModelling {
         }
     }
 
-    private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations){
+    private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations, String outputFile){
         // Step 1: Verify that the flatFile exists and is readable
         File inputFile = new File(flatFile);
         if (!inputFile.exists() || !inputFile.canRead()) {
@@ -77,7 +87,7 @@ public class B4TopicModelling {
             java.io.BufferedReader reader = new java.io.BufferedReader(fileReader);
             String line;
             int lineCount = 0;
-            while ((line = reader.readLine()) != null && lineCount < 5) { // Limit to first 5 lines
+            while ((line = reader.readLine()) != null && lineCount < 5) {
                 System.out.println(line);
                 lineCount++;
             }
@@ -121,8 +131,8 @@ public class B4TopicModelling {
             System.out.println("Topic modeling complete!");
             Object[][] topWords = model.getTopWords(10);
 
-            // New - Save topics to CSV file
-            saveTopicsToCSV(topWords, "topic_modeling_results.csv");
+            // New - Save topics to specified CSV file
+            saveTopicsToCSV(topWords, outputFile);
 
             for (int i = 0; i < topWords.length; i++) {
                 System.out.print("Top words in topic " + i + ": ");
