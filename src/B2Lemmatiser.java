@@ -1,15 +1,14 @@
 import edu.stanford.nlp.simple.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 // B2 - Text Cleaning and Lemmatisation block
 public class B2Lemmatiser {
 
-    /**
-     * B2 Main method to launch the Lemmatising block
-     * @param args List of arguments, there should be one: the JSON file storing data
-     */
+    // New - Stop words
+    private Set<String> stopWords;
 
     // B2.1 Main Lemmatisation block
     public static void main(String[] args) {
@@ -30,16 +29,15 @@ public class B2Lemmatiser {
         lemmatiser.startLemmatisation(datastore);
     }
 
-    /**
-     * B2.4 Lemmatisation process:
-     * Method launching the lemmatisation process
-     * @param filename The datastore from which the get the document data
-     */
+    // B2.4 Lemmatisation process:
     private void startLemmatisation(String filename){
         System.out.println("Loading data from "+filename);
         // B2.5 using a JSONIOHelper to read the documents
         JSONIOHelper jsonIO = new JSONIOHelper();
         jsonIO.loadJSON(filename);
+
+        // New - Load stopWords
+        stopWords = jsonIO.loadStopWords("stopwords.txt");
 
         // B2.6 Retrieving documents from the datastore
         ConcurrentHashMap<String,String> documents = jsonIO.getDocumentsFromJSONStructure();
@@ -48,33 +46,25 @@ public class B2Lemmatiser {
         ConcurrentHashMap<String,String> lemmatised = new ConcurrentHashMap<>();
         for(Map.Entry<String,String> entry: documents.entrySet()){
             // B2.7.1 Lemmatize each document
-            lemmatised.put(entry.getKey(), lemmatiseSingleDocument(entry.getValue()));
+            lemmatised.put(entry.getKey(), lemmatiseAndFilter(entry.getValue()));
         }
         // B2.8 Adding lemmatised content back into the JSON datastore
         jsonIO.addLemmasToJSONStructure(lemmatised);
         // B2.9 Saving updated JSON datastore
         jsonIO.saveJSON(filename);
+
     }
 
-    /**
-     * B2.7.1 Method lemmatising the content of one document
-     * @param text The original document text
-     * @return The lemmatised document text
-     */
-    private String lemmatiseSingleDocument(String text){
-        // B2.7.2 Cleaning the text by removing punctuation and normalizing spaces
-        text = text.replaceAll("\\p{Punct}", " ");
-        text = text.replaceAll("\\s+", " ");
-        text = text.trim();
-        // B2.7.3 Converting text to lowercase for consistency
-        text = text.toLowerCase();
-
-        // B2.7.4 Using Stanford CoreNLP to lemmatize the text
+    // New - filter with JSONIOHelper's filterStopWords method to remove stop words
+    private String lemmatiseAndFilter(String text) {
+        text = text.replaceAll("\\p{Punct}", " ")
+                .replaceAll("\\s+", " ")
+                .trim()
+                .toLowerCase();
         Sentence sentence = new Sentence(text);
         List<String> lemmas = sentence.lemmas();
+        String lemmatizedText = String.join(" ", lemmas);
 
-        // B2.7.5 Joining lemmatised words back into a single string
-        text = String.join(" ", lemmas);
-        return text;
+        return new JSONIOHelper().filterStopWords(lemmatizedText);
     }
 }

@@ -1,10 +1,7 @@
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,9 +25,26 @@ public class JSONIOHelper {
     }
 
     // New - Method to Load stop words from a file
-    private Set<String> loadStopWords(String filePath) {
+    // Updated - Method to Load stop words from a file, creating a default if not found
+    Set<String> loadStopWords(String filePath) {
         Set<String> stopWordsSet = new HashSet<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        File stopWordsFile = new File(filePath);
+
+        // Check if stopwords.txt exists; create if not
+        if (!stopWordsFile.exists()) {
+            System.out.println("stopwords.txt not found. Creating a default one.");
+            try (FileWriter writer = new FileWriter(stopWordsFile)) {
+                writer.write("the\nis\nin\nand\nof\na\nto\nit\n"); // basic stop words
+                System.out.println("Default stopwords.txt created.");
+            } catch (IOException e) {
+                System.out.println("Failed to create stopwords.txt.");
+                e.printStackTrace();
+                return stopWordsSet; // Return empty set if creation fails
+            }
+        }
+
+        // Load stop words from the file
+        try (BufferedReader br = new BufferedReader(new FileReader(stopWordsFile))) {
             String word;
             while ((word = br.readLine()) != null) {
                 stopWordsSet.add(word.trim().toLowerCase());
@@ -145,7 +159,7 @@ public class JSONIOHelper {
     }
 
     // New - Helper method to filter stop words from text
-    private String filterStopWords(String text) {
+    public String filterStopWords(String text) {
         StringBuilder result = new StringBuilder();
         for (String word : text.split("\\s+")) {
             if (!stopWords.contains(word.toLowerCase())) {

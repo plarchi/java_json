@@ -8,7 +8,9 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -30,28 +32,31 @@ public class B4TopicModelling {
     private void startTopicModelling(String filename){
         System.out.println("Starting topic modelling with file: " + filename);
 
-        JSONIOHelper josnIO = new JSONIOHelper();
-        josnIO.loadJSON(filename);
+        JSONIOHelper jsonIO = new JSONIOHelper();
+        jsonIO.loadJSON(filename);
 
-        ConcurrentHashMap<String, String> lemmas = josnIO.getLemmasFromJSONStructure();
+        // Load stop words using JSONIOHelper
+        Set<String> stopWords = jsonIO.loadStopWords("stopwords.txt");
 
-        if (lemmas.isEmpty()) {
-            System.out.println("No lemmatised data found. Ensure the JSON file contains processed lemmas.");
-        } else {
-            System.out.println("Lemmatised data loaded successfully. Number of documents: " + lemmas.size());
-            saveLemmasToFile("topicdata.txt", lemmas);
+        // Retrieve and filter lemmatized text
+        ConcurrentHashMap<String, String> lemmas = jsonIO.getLemmasFromJSONStructure();
+        ConcurrentHashMap<String, String> filteredLemmas = new ConcurrentHashMap<>();
+
+        for (Map.Entry<String, String> entry : lemmas.entrySet()) {
+            String filteredText = filterText(entry.getValue(), stopWords);
+            filteredLemmas.put(entry.getKey(), filteredText);
         }
 
-        // New - Customer Header
+        // Save filtered lemmas to file for topic modeling
+        saveLemmasToFile("topicdata.txt", filteredLemmas);
+
+        // Prompt for CSV filename and header, then run topic modeling
         System.out.println("Please input a header for the topic data in the CSV file:");
         Scanner scanner = new Scanner(System.in);
         String customHeader = scanner.nextLine().trim();
 
-        // Scanner - Prompt the user for the custom filename
         System.out.println("Please input the topic file name for the modeling result in CSV format:");
         String customFilename = scanner.nextLine().trim();
-
-        // Add .csv if the user input not included
         if(!customFilename.endsWith(".csv")){
             customFilename += ".csv";
         }
@@ -71,6 +76,16 @@ public class B4TopicModelling {
             System.out.println("An error occurred while saving lemmas to file.");
             e.printStackTrace();
         }
+    }
+
+    private String filterText(String text, Set<String> stopWords) {
+        StringBuilder filteredText = new StringBuilder();
+        for (String word : text.split("\\s+")) {
+            if (!stopWords.contains(word.toLowerCase())) {
+                filteredText.append(word).append(" ");
+            }
+        }
+        return filteredText.toString().trim();
     }
 
     private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations, String outputFile, String customHeader){
