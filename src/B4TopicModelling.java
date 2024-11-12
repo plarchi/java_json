@@ -42,9 +42,13 @@ public class B4TopicModelling {
             saveLemmasToFile("topicdata.txt", lemmas);
         }
 
+        // New - Customer Header
+        System.out.println("Please input a header for the topic data in the CSV file:");
+        Scanner scanner = new Scanner(System.in);
+        String customHeader = scanner.nextLine().trim();
+
         // Scanner - Prompt the user for the custom filename
         System.out.println("Please input the topic file name for the modeling result in CSV format:");
-        Scanner scanner = new Scanner(System.in);
         String customFilename = scanner.nextLine().trim();
 
         // Add .csv if the user input not included
@@ -52,7 +56,7 @@ public class B4TopicModelling {
             customFilename += ".csv";
         }
 
-        runTopicModelling("topicdata.txt", 5, 2, 50, customFilename);
+        runTopicModelling("topicdata.txt", 5, 2, 50, customFilename, customHeader);
     }
 
     private void saveLemmasToFile(String flatFile, ConcurrentHashMap<String, String> lemmas) {
@@ -69,8 +73,7 @@ public class B4TopicModelling {
         }
     }
 
-    private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations, String outputFile){
-        // Step 1: Verify that the flatFile exists and is readable
+    private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations, String outputFile, String customHeader){
         File inputFile = new File(flatFile);
         if (!inputFile.exists() || !inputFile.canRead()) {
             System.out.println("Error: The specified flatFile does not exist or cannot be read.");
@@ -79,7 +82,6 @@ public class B4TopicModelling {
             System.out.println("Confirmed: flatFile exists and is readable.");
         }
 
-        // Step 2: Optionally read and print the contents of flatFile for debugging
         try (FileInputStream fileInputStream = new FileInputStream(inputFile);
              InputStreamReader fileReader = new InputStreamReader(fileInputStream)) {
 
@@ -97,13 +99,11 @@ public class B4TopicModelling {
             System.exit(1);
         }
 
-        // Step 3: Proceed with MALLET loading and topic modeling
         ArrayList<Pipe> pipeList = new ArrayList<>();
         pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));
         pipeList.add(new TokenSequence2FeatureSequence());
         InstanceList instances = new InstanceList(new SerialPipes(pipeList));
 
-        // Load data into MALLET instances
         try (FileInputStream fileInputStream = new FileInputStream(inputFile);
              InputStreamReader fileReader = new InputStreamReader(fileInputStream)) {
 
@@ -120,7 +120,6 @@ public class B4TopicModelling {
             System.exit(1);
         }
 
-        // Run topic modeling as before
         try {
             ParallelTopicModel model = new ParallelTopicModel(nTopics, 1.0, 0.01);
             model.addInstances(instances);
@@ -132,7 +131,7 @@ public class B4TopicModelling {
             Object[][] topWords = model.getTopWords(10);
 
             // New - Save topics to specified CSV file
-            saveTopicsToCSV(topWords, outputFile);
+            saveTopicsToCSV(topWords, outputFile, customHeader);
 
             for (int i = 0; i < topWords.length; i++) {
                 System.out.print("Top words in topic " + i + ": ");
@@ -147,8 +146,9 @@ public class B4TopicModelling {
         }
     }
 
-    private void saveTopicsToCSV(Object[][] topWords, String filename) {
+    private void saveTopicsToCSV(Object[][] topWords, String filename, String customHeader) {
         try (FileWriter writer = new FileWriter(filename)) {
+            writer.write(customHeader + System.lineSeparator());
             writer.write("Topic,TopWords\n");
             for (int i = 0; i < topWords.length; i++) {
                 StringBuilder line = new StringBuilder("Topic " + i + ",");
