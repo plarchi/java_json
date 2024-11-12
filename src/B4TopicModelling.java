@@ -50,18 +50,14 @@ public class B4TopicModelling {
         // Save filtered lemmas to file for topic modeling
         saveLemmasToFile("topicdata.txt", filteredLemmas);
 
-        // Prompt for CSV filename and header, then run topic modeling
-        System.out.println("Please input a header for the topic data in the CSV file:");
-        Scanner scanner = new Scanner(System.in);
-        String customHeader = scanner.nextLine().trim();
-
         System.out.println("Please input the topic file name for the modeling result in CSV format:");
+        Scanner scanner = new Scanner(System.in);
         String customFilename = scanner.nextLine().trim();
         if(!customFilename.endsWith(".csv")){
             customFilename += ".csv";
         }
 
-        runTopicModelling("topicdata.txt", 5, 2, 50, customFilename, customHeader);
+        runTopicModelling("topicdata.txt", 5, 2, 50, customFilename);
     }
 
     private void saveLemmasToFile(String flatFile, ConcurrentHashMap<String, String> lemmas) {
@@ -88,7 +84,7 @@ public class B4TopicModelling {
         return filteredText.toString().trim();
     }
 
-    private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations, String outputFile, String customHeader){
+    private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations, String outputFile){
         File inputFile = new File(flatFile);
         if (!inputFile.exists() || !inputFile.canRead()) {
             System.out.println("Error: The specified flatFile does not exist or cannot be read.");
@@ -146,7 +142,7 @@ public class B4TopicModelling {
             Object[][] topWords = model.getTopWords(10);
 
             // New - Save topics to specified CSV file
-            saveTopicsToCSV(topWords, outputFile, customHeader);
+            saveTopicsToCSV(topWords, outputFile);
 
             for (int i = 0; i < topWords.length; i++) {
                 System.out.print("Top words in topic " + i + ": ");
@@ -161,9 +157,8 @@ public class B4TopicModelling {
         }
     }
 
-    private void saveTopicsToCSV(Object[][] topWords, String filename, String customHeader) {
+    private void saveTopicsToCSV(Object[][] topWords, String filename) {
         try (FileWriter writer = new FileWriter(filename)) {
-            writer.write(customHeader + System.lineSeparator());
             writer.write("Topic,TopWords\n");
             for (int i = 0; i < topWords.length; i++) {
                 StringBuilder line = new StringBuilder("Topic " + i + ",");
