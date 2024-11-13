@@ -50,14 +50,20 @@ public class B4TopicModelling {
         // Save filtered lemmas to file for topic modeling
         saveLemmasToFile("topicdata.txt", filteredLemmas);
 
-        System.out.println("Please input the topic file name for the modeling result in CSV format:");
+        // Get the desired number of topics from the user
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the number of topics you want to generate:");
+        int numberOfTopics = scanner.nextInt(); // Read user input for the number of topics
+
+        System.out.println("Please input the topic file name for the modeling result in CSV format:");
+        scanner.nextLine();  // Consume newline
         String customFilename = scanner.nextLine().trim();
-        if(!customFilename.endsWith(".csv")){
+        if (!customFilename.endsWith(".csv")) {
             customFilename += ".csv";
         }
 
-        runTopicModelling("topicdata.txt", 5, 2, 50, customFilename);
+        // Run topic modeling with the user-specified number of topics
+        runTopicModelling("topicdata.txt", numberOfTopics, 2, 50, customFilename);
     }
 
     private void saveLemmasToFile(String flatFile, ConcurrentHashMap<String, String> lemmas) {
