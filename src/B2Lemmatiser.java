@@ -43,11 +43,14 @@ public class B2Lemmatiser {
         ConcurrentHashMap<String,String> documents = jsonIO.getDocumentsFromJSONStructure();
 
         // B2.7 Lemmatizing documents and storing results in a separate HashMap
-        ConcurrentHashMap<String,String> lemmatised = new ConcurrentHashMap<>();
-        for(Map.Entry<String,String> entry: documents.entrySet()){
+        ConcurrentHashMap<String, String> lemmatised = new ConcurrentHashMap<>();
+        for (Map.Entry<String, String> entry : documents.entrySet()) {
             // B2.7.1 Lemmatize each document
-            lemmatised.put(entry.getKey(), lemmatiseAndFilter(entry.getValue()));
+            String processedText = lemmatiseAndFilter(entry.getValue());
+            lemmatised.put(entry.getKey(), processedText);
+            System.out.println("Processed document " + entry.getKey() + ": " + processedText);
         }
+
         // B2.8 Adding lemmatised content back into the JSON datastore
         jsonIO.addLemmasToJSONStructure(lemmatised);
         // B2.9 Saving updated JSON datastore
@@ -57,14 +60,27 @@ public class B2Lemmatiser {
 
     // New - filter with JSONIOHelper's filterStopWords method to remove stop words
     private String lemmatiseAndFilter(String text) {
+        // Clean the text
         text = text.replaceAll("\\p{Punct}", " ")
                 .replaceAll("\\s+", " ")
-                .trim()
-                .toLowerCase();
+                .trim().toLowerCase();
+
+        // Lemmatize the text
         Sentence sentence = new Sentence(text);
         List<String> lemmas = sentence.lemmas();
-        String lemmatizedText = String.join(" ", lemmas);
+        System.out.println("Original text: " + text);
+        System.out.println("Lemmatized tokens: " + lemmas);
 
-        return new JSONIOHelper().filterStopWords(lemmatizedText);
+        // Filter out stop words in one pass
+        StringBuilder filteredText = new StringBuilder();
+        for (String lemma : lemmas) {
+            if (!stopWords.contains(lemma)) { // Only include non-stop words
+                filteredText.append(lemma).append(" ");
+            }
+        }
+
+        String result = filteredText.toString().trim();
+        System.out.println("Filtered text: " + result);
+        return result;
     }
 }
