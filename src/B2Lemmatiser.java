@@ -7,12 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 // B2 - Text Cleaning and Lemmatisation block
 public class B2Lemmatiser {
 
-    // New - Stop words
+    // New - B2.1 Stop words
     private Set<String> stopWords;
 
-    // B2.1 Main Lemmatisation block
+    // B2.2 Main Lemmatisation block
     public static void main(String[] args) {
-        // B2.2 Argument validation for input JSON file
+        // B2.2.1 Argument validation for input JSON file
         if(args.length != 1){
             System.out.println("Provide one parameter: the JSON file storing data.");
             System.exit(1);
@@ -23,55 +23,55 @@ public class B2Lemmatiser {
             System.exit(1);
         }
 
-        // B2.3 Instantiate and launch lemmatiser
+        // B2.2.2 Instantiate and launch lemmatiser
         B2Lemmatiser lemmatiser = new B2Lemmatiser();
-        // B2.4 Start Lemmatisation process
+        // B2.2.3 Start Lemmatisation process
         lemmatiser.startLemmatisation(datastore);
     }
 
-    // B2.4 Lemmatisation process:
+    // B2.3 Lemmatisation process:
     private void startLemmatisation(String filename){
         System.out.println("Loading data from "+filename);
-        // B2.5 using a JSONIOHelper to read the documents
+        // B2.3.1 using a JSONIOHelper to read the documents
         JSONIOHelper jsonIO = new JSONIOHelper();
         jsonIO.loadJSON(filename);
 
-        // New - Load stopWords
+        // New B2.3.2 - Load stopWords
         stopWords = jsonIO.loadStopWords("stopwords.txt");
 
-        // B2.6 Retrieving documents from the datastore
+        // B2.3.3 Retrieving documents from the datastore
         ConcurrentHashMap<String,String> documents = jsonIO.getDocumentsFromJSONStructure();
 
-        // B2.7 Lemmatizing documents and storing results in a separate HashMap
+        // B2.3.4 Lemmatizing documents and storing results in a separate HashMap
         ConcurrentHashMap<String, String> lemmatised = new ConcurrentHashMap<>();
         for (Map.Entry<String, String> entry : documents.entrySet()) {
-            // B2.7.1 Lemmatize each document
+            // B2.3.5 Lemmatize each document
             String processedText = lemmatiseAndFilter(entry.getValue());
             lemmatised.put(entry.getKey(), processedText);
             System.out.println("Processed document " + entry.getKey() + ": " + processedText);
         }
 
-        // B2.8 Adding lemmatised content back into the JSON datastore
+        // B2.3.6 Adding lemmatised content back into the JSON datastore
         jsonIO.addLemmasToJSONStructure(lemmatised);
-        // B2.9 Saving updated JSON datastore
+        // B2.3.7 Saving updated JSON datastore
         jsonIO.saveJSON(filename);
 
     }
 
-    // New - filter with JSONIOHelper's filterStopWords method to remove stop words
+    // New - B4 filter with JSONIOHelper's filterStopWords method to remove stop words
     private String lemmatiseAndFilter(String text) {
-        // Clean the text
+        // B4.1 Clean the text
         text = text.replaceAll("\\p{Punct}", " ")
                 .replaceAll("\\s+", " ")
                 .trim().toLowerCase();
 
-        // Lemmatize the text
+        // B4.2 Lemmatize the text
         Sentence sentence = new Sentence(text);
         List<String> lemmas = sentence.lemmas();
         System.out.println("Original text: " + text);
         System.out.println("Lemmatized tokens: " + lemmas);
 
-        // Filter out stop words in one pass
+        // B4.3 Filter out stop words in one pass
         StringBuilder filteredText = new StringBuilder();
         for (String lemma : lemmas) {
             if (!stopWords.contains(lemma)) { // Only include non-stop words
