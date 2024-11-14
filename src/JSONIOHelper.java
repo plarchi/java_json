@@ -7,30 +7,28 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-// B3 - JSON Data Handling Block
+// B5 - JSON Data Handling Block
 public class JSONIOHelper {
 
-    // B3.1 Root of the JSON datastore
+    // B5.1 Root of the JSON datastore
     JSONObject rootObject;
-    // B3.1 Part of the JSON datastore containing full documents
+    // B5.1 Part of the JSON datastore containing full documents
     JSONObject documentsObject;
-    // B3.1 Part of the JSON datastore containing cleaned (lemmatised) documents
+    // B5.1 Part of the JSON datastore containing cleaned (lemmatised) documents
     JSONObject lemmasObject;
-    // New Function - Set to store stop words
+    // B5.2 New Function - Set to store stop words
     private Set<String> stopWords;
 
-    // New - Constructor to initialize stop words
     public JSONIOHelper(){
         this.stopWords = loadStopWords("stopwords.txt");
     }
 
-    // New - Method to Load stop words from a file
-    // Updated - Method to Load stop words from a file, creating a default if not found
+    // B5.2.1 - Method to load stop words, creating a default file if none exists
     Set<String> loadStopWords(String filePath) {
         Set<String> stopWordsSet = new HashSet<>();
         File stopWordsFile = new File(filePath);
 
-        // Check if stopwords.txt exists; create if not
+        // B5.2.2 Check if stopwords.txt exists; create if not
         if (!stopWordsFile.exists()) {
             System.out.println("stopwords.txt not found. Creating a default one.");
             try (FileWriter writer = new FileWriter(stopWordsFile)) {
@@ -43,7 +41,7 @@ public class JSONIOHelper {
             }
         }
 
-        // Load stop words from the file
+        // B5.2.3 Load stop words from the file
         try (BufferedReader br = new BufferedReader(new FileReader(stopWordsFile))) {
             String word;
             while ((word = br.readLine()) != null) {
@@ -57,7 +55,7 @@ public class JSONIOHelper {
         return stopWordsSet;
     }
 
-    // B3.2 Method creating an empty datastore structure
+    // B5.3 Method creating an empty datastore structure
     public void createBasicJSONStructure(){
         rootObject = new JSONObject();
         documentsObject = new JSONObject();
@@ -66,10 +64,7 @@ public class JSONIOHelper {
         rootObject.put("lemmas", lemmasObject);
     }
 
-    /**
-     * B3.3 Method filling the full documents datastore part
-     * @param documents Hashmap from which to get the documents data
-     */
+    // B5.4 Method filling the full documents datastore part
     public void addDocumentsToJSONStructure(ConcurrentHashMap<String,String> documents){
         for(Entry<String, String> entry: documents.entrySet()){
             documentsObject.put(entry.getKey(),entry.getValue());
@@ -77,10 +72,7 @@ public class JSONIOHelper {
         rootObject.put("documents", documentsObject);
     }
 
-    /**
-     * B3.4 Method writing the JSON datastore on file
-     * @param filename JSON file on which to write the datastore
-     */
+    // B5.5 Method writing the JSON datastore on file
     public void saveJSON(String filename){
         String jsonString = rootObject.toJSONString();
         try(FileWriter writer = new FileWriter(filename)){
@@ -91,27 +83,19 @@ public class JSONIOHelper {
         }
     }
 
-    /**
-     * B3.5 Method reading the content of a datastore from file
-     * @param filename Json file from which to read the datastore content
-     */
+    // B5.6 Method reading the content of a datastore from file
     public void loadJSON(String filename){
-        // B3.5.1 First, create an empty structure
         createBasicJSONStructure();
         try(FileReader file = new FileReader(filename)){
-            // B3.5.2 Parse the JSON
+            // B5.6.1 Parse the JSON
             JSONParser parser = new JSONParser();
             rootObject = (JSONObject) parser.parse(file);
 
-            // B3.5.3 Load documents section if it exists
             if(rootObject.get("documents") != null){
-                // if documents exist, fill the documentsObject
                 documentsObject = (JSONObject) rootObject.get("documents");
             }
 
-            // B3.5.4 Load lemmas section if it exists
             if(rootObject.get("lemmas") != null){
-                // if lemmas exist, fill the lemmasObject
                 lemmasObject = (JSONObject) rootObject.get("lemmas");
             }
             System.out.println("JSON read successful!");
@@ -123,10 +107,7 @@ public class JSONIOHelper {
         }
     }
 
-    /**
-     * B3.6 Method to extract the documents from the datastore
-     * @return The documents as a Hashmap object (key: doc id, value: text)
-     */
+    // B5.7 Method to extract the documents from the datastore
     public ConcurrentHashMap<String,String> getDocumentsFromJSONStructure(){
         ConcurrentHashMap<String,String> documents = new ConcurrentHashMap<>();
         for(String key: (Iterable<String>)documentsObject.keySet()){
@@ -135,10 +116,7 @@ public class JSONIOHelper {
         return documents;
     }
 
-    /**
-     * B3.7 Method filling the lemmatised documents datastore part
-     * @param lemmas Hashmap from which to get the lemmas data
-     */
+    // B5.8 Method filling the lemmatised documents datastore part
     public void addLemmasToJSONStructure(ConcurrentHashMap<String,String> lemmas){
         for(Entry<String, String> entry: lemmas.entrySet()){
             lemmasObject.put(entry.getKey(),entry.getValue());
@@ -146,10 +124,7 @@ public class JSONIOHelper {
         rootObject.put("lemmas", lemmasObject);
     }
 
-    /**
-     * B3.8 Method to extract the lemmas from the datastore
-     * @return The lemmas as a Hashmap object (key: doc id, value: lemmatised text)
-     */
+    // B5.9 Method to extract the lemmas from the datastore
     public ConcurrentHashMap<String,String> getLemmasFromJSONStructure(){
         ConcurrentHashMap<String,String> lemmas = new ConcurrentHashMap<>();
         for(String key: (Iterable<String>)lemmasObject.keySet()){
@@ -158,7 +133,7 @@ public class JSONIOHelper {
         return lemmas;
     }
 
-    // New - Helper method to filter stop words from text
+    // B5.10 New - Helper method to filter stop words from text
     public String filterStopWords(String text) {
         StringBuilder result = new StringBuilder();
         for (String word : text.split("\\s+")) {

@@ -16,29 +16,32 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.Map.Entry;
 
-
 public class B4TopicModelling {
+    // B4.1 Main entry point for starting topic modelling
     public static void main(String[] args){
+        // B4.1.1 Validate JSON filename argument
         if(args.length !=1){
             System.out.println("Please provide the JSON file name as an argument.");
             System.exit(1);
         }
         String filename = args[0];
 
+        // B4.1.2 Instantiate and launch topic modeling
         B4TopicModelling topicModelling = new B4TopicModelling();
         topicModelling.startTopicModelling(filename);
     }
 
+    // B4.2 Start the topic modelling process
     private void startTopicModelling(String filename){
         System.out.println("Starting topic modelling with file: " + filename);
 
         JSONIOHelper jsonIO = new JSONIOHelper();
         jsonIO.loadJSON(filename);
 
-        // Load stop words using JSONIOHelper
+        // B4.2.1 Load stop words using JSONIOHelper
         Set<String> stopWords = jsonIO.loadStopWords("stopwords.txt");
 
-        // Retrieve and filter lemmatized text
+        // B4.2.2 Retrieve and filter lemmatized text from JSON
         ConcurrentHashMap<String, String> lemmas = jsonIO.getLemmasFromJSONStructure();
         ConcurrentHashMap<String, String> filteredLemmas = new ConcurrentHashMap<>();
 
@@ -47,10 +50,10 @@ public class B4TopicModelling {
             filteredLemmas.put(entry.getKey(), filteredText);
         }
 
-        // Save filtered lemmas to file for topic modeling
+        // B4.2.3 Save filtered lemmas to file for topic modeling
         saveLemmasToFile("topicdata.txt", filteredLemmas);
 
-        // Get the desired number of topics from the user
+        // B4.2.4 Prompt for the number of topics and CSV filename
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the number of topics you want to generate:");
         int numberOfTopics = scanner.nextInt(); // Read user input for the number of topics
@@ -62,10 +65,11 @@ public class B4TopicModelling {
             customFilename += ".csv";
         }
 
-        // Run topic modeling with the user-specified number of topics
+        // B4.2.5 Run topic modeling with specified number of topics
         runTopicModelling("topicdata.txt", numberOfTopics, 2, 50, customFilename);
     }
 
+    // B4.3 Save lemmas to a temporary file for topic modeling input
     private void saveLemmasToFile(String flatFile, ConcurrentHashMap<String, String> lemmas) {
         try (FileWriter writer = new FileWriter(flatFile)) {
             for (Entry<String, String> entry : lemmas.entrySet()) {
@@ -80,6 +84,7 @@ public class B4TopicModelling {
         }
     }
 
+    // B4.4 Filter stop words from text using a stop words set
     private String filterText(String text, Set<String> stopWords) {
         StringBuilder filteredText = new StringBuilder();
         for (String word : text.split("\\s+")) {
@@ -90,8 +95,11 @@ public class B4TopicModelling {
         return filteredText.toString().trim();
     }
 
+    // B4.5 Run the topic modeling process with the MALLET library
     private void runTopicModelling(String flatFile, int nTopics, int nThreads, int nIterations, String outputFile){
         File inputFile = new File(flatFile);
+
+        // B4.5.1 Verify that input file exists and is readable
         if (!inputFile.exists() || !inputFile.canRead()) {
             System.out.println("Error: The specified flatFile does not exist or cannot be read.");
             System.exit(1);
@@ -99,6 +107,7 @@ public class B4TopicModelling {
             System.out.println("Confirmed: flatFile exists and is readable.");
         }
 
+        // B4.5.2 Print initial lines of flat file for verification
         try (FileInputStream fileInputStream = new FileInputStream(inputFile);
              InputStreamReader fileReader = new InputStreamReader(fileInputStream)) {
 
@@ -116,11 +125,13 @@ public class B4TopicModelling {
             System.exit(1);
         }
 
+        // B4.5.3 Prepare data pipes for MALLET instance list
         ArrayList<Pipe> pipeList = new ArrayList<>();
         pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));
         pipeList.add(new TokenSequence2FeatureSequence());
         InstanceList instances = new InstanceList(new SerialPipes(pipeList));
 
+        // B4.5.4 Load instances into MALLET from the flat file
         try (FileInputStream fileInputStream = new FileInputStream(inputFile);
              InputStreamReader fileReader = new InputStreamReader(fileInputStream)) {
 
@@ -137,6 +148,7 @@ public class B4TopicModelling {
             System.exit(1);
         }
 
+        // B4.5.5 Initialize and run the topic modeling algorithm
         try {
             ParallelTopicModel model = new ParallelTopicModel(nTopics, 1.0, 0.01);
             model.addInstances(instances);
@@ -163,6 +175,7 @@ public class B4TopicModelling {
         }
     }
 
+    // B4.6 Helper method to save topics to a CSV file
     private void saveTopicsToCSV(Object[][] topWords, String filename) {
         try (FileWriter writer = new FileWriter(filename)) {
             writer.write("Topic,TopWords\n");
