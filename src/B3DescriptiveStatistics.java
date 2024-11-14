@@ -5,36 +5,41 @@ import java.util.Map.Entry;
 import static edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.WordlistTest.TYPE.word;
 
 public class B3DescriptiveStatistics {
+    // B3.1 - Main method to launch Descriptive Statistics
     public static void main(String[] args){
+        // B3.1.1 Argument validation for input JSON file
         if (args.length != 1) {
             System.out.println("Please provide the JSON file name as an argument.");
             System.exit(1);
         }
-        // Call startCreatingStatistics() with the provided filename
+
+        // B3.1.2 Call startCreatingStatistics() with the provided filename
         String filename = args[0];
         B3DescriptiveStatistics stats = new B3DescriptiveStatistics();
         stats.startCreatingStatistics(filename);
     }
 
-    // Load Text placeholder
+    // B3.2 - Method to start the process of creating statistics
     public void startCreatingStatistics(String filename){
         System.out.println("Starting to create statistics from: " + filename);
 
-        // Instantiate JSONIOHelper to load JSON data
+        // B3.2.1 Instantiate JSONIOHelper to load JSON data
         JSONIOHelper jsonIO = new JSONIOHelper();
         jsonIO.loadJSON(filename);
-        // Try to load lemmas; if empty, load from documents instead
+
+        // B3.2.2 Try to load lemmas; if empty, load from documents instead
         ConcurrentHashMap<String, String> lemmas = jsonIO.getDocumentsFromJSONStructure();
-        // Counting method
         countWordsInCorpus(lemmas);
         countWordsInDocuments(lemmas);
-        // Print directory
+        // B3.2.3 Print directory information
         System.out.println("Working directory: " + System.getProperty("user.dir"));
     }
 
+    // B3.3 Count word frequencies across the entire corpus
     private void countWordsInCorpus(ConcurrentHashMap<String, String> lemmas){
         ConcurrentHashMap<String, Integer> counts = new ConcurrentHashMap<>();
 
+        // B3.3.1 Calculate total word frequency for corpus
         for(String value : lemmas.values()){
             String[] words = value.split(" ");
             for (String word : words){
@@ -42,10 +47,10 @@ public class B3DescriptiveStatistics {
             }
         }
 
-        // print the word counts
+        // B3.3.2 Print word counts
         counts.forEach((word, count) -> System.out.println(word + ": " + count));
 
-        // Output counts as CSV file
+        // B3.3.3 Output word counts to CSV file
         try{
             outputCountsAsCSV(counts, "word_count.csv");
         } catch (IOException e) {
@@ -54,16 +59,18 @@ public class B3DescriptiveStatistics {
         }
     }
 
+    // B3.4 Count words within each document separately
     private void countWordsInDocuments(ConcurrentHashMap<String,String> lemmas){
         ConcurrentHashMap<String, Integer> documentWordCounts = new ConcurrentHashMap<>();
 
+        // B3.4.1 Calculate word count per document
         for(Entry<String, String>entry : lemmas.entrySet()){
             String[]words = entry.getValue().split(" ");
             documentWordCounts.put(entry.getKey(), words.length);
         }
         documentWordCounts.forEach((doc, count) -> System.out.println(doc + ": " + count));
 
-        // Write to CSV
+        // B3.4.2 Write document-level word counts to CSV
         try{
             outputCountsAsCSV(documentWordCounts, "documentWordCount.csv");
             System.out.println("Document word counts successfully written to documentWordCount.csv");
@@ -73,13 +80,14 @@ public class B3DescriptiveStatistics {
         }
     }
 
+    // B3.5 Helper method to output counts to a CSV file
     private void outputCountsAsCSV(ConcurrentHashMap<String, Integer> counts, String filename) throws IOException {
         StringBuilder csvOutput = new StringBuilder();
 
-        // Header for CSV
+        // B3.5.1 Add CSV header row
         csvOutput.append("Word,Count").append(System.lineSeparator());
 
-        // Iterate over each CSV content
+        // B3.5.2 Populate CSV rows with word/count pairs
         for(Entry<String, Integer>entry : counts.entrySet()){
             csvOutput.append(entry.getKey())
                     .append(",")
@@ -87,7 +95,7 @@ public class B3DescriptiveStatistics {
                     .append(System.lineSeparator());
         }
 
-        // Write CSV content to file
+        // B3.5.3 Write CSV content to file
         try (FileWriter writer = new FileWriter(filename)) {
             writer.write(csvOutput.toString());
             System.out.println("Word counts successfully written to " + filename);
