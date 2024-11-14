@@ -60,12 +60,12 @@ public class B2Lemmatiser {
 
     // New - B4 filter with JSONIOHelper's filterStopWords method to remove stop words
     private String lemmatiseAndFilter(String text) {
-        // B4.1 Clean the text
+        // B4.1 Clean the text - by removing punctuation and normalizing spaces
         text = text.replaceAll("\\p{Punct}", " ")
                 .replaceAll("\\s+", " ")
                 .trim().toLowerCase();
 
-        // B4.2 Lemmatize the text
+        // B4.2 Lemmatize the text - Stanford NLP to convert each word to its lemma, creating a simplified form of the text
         Sentence sentence = new Sentence(text);
         List<String> lemmas = sentence.lemmas();
         System.out.println("Original text: " + text);

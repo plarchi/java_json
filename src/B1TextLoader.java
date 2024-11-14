@@ -6,19 +6,19 @@ import java.util.concurrent.ConcurrentHashMap;
 // B1 - Loading and Saving from .txt to .json
 public class B1TextLoader {
 
-    // B1.1 Map storing documents - key: document ID, value: document text */
+    // B1.1 Map storing documents - key: document ID, value: document text
     private ConcurrentHashMap<String,String> documents = new ConcurrentHashMap<>();
 
-    // B1.2 Loading and Saving block,
+    // B1.2 Loading and Saving block - Main method for validating arguments, loading text, and saving to JSON.
     public static void main(String[] args) {
-        // B1.2.1 Argument validation for input/output file names
+        // B1.2.1 Argument validation for input/output file names - .txt and .json extensions
         if(args.length != 2){
-            System.out.println("Provide two parameters: the text file to read and the JSON file to store data.");
+            System.out.println("Provide two parameters: the .txt file to read and the .json file to store data.");
             System.exit(1);
         }
         String inFile = args[0];
 
-        // B1.2.2 JSON file name
+        // B1.2.2 Define JSON output file name and validate extension.
         String outFile = args[1];
         if(!inFile.endsWith(".txt")){
             System.out.println("The first argument must have a .txt extension");
@@ -37,11 +37,11 @@ public class B1TextLoader {
         loader.saveDocumentsToJSON(outFile);
     }
 
-    // B1.3 Loading text .txt file into HashMap
+    // B1.3 Method to load each line from the text file into a HashMap
     private void loadTextFile(String filename){
         System.out.println("Loading file...");
         File f = new File(filename);
-        // B1.3.1 - use a BufferedReader to read file line by lines, each line is a new document
+        // B1.3.1 Use BufferedReader to read file line by line; each line is stored as a separate document.
         try {
             BufferedReader br = new BufferedReader(new FileReader(f));
             String line = br.readLine();
@@ -60,18 +60,18 @@ public class B1TextLoader {
         System.out.println("Load complete. Documents loaded: " + documents.size());
     }
 
-    // B1.4 - Method to print the number of words in each document (not essential)
+    // B1.4 - Method to print the number of words in each document
     private void countWordsInDocuments(ConcurrentHashMap<String,String> documents){
         documents.forEach(this::countWordsInSingleDocument);
     }
 
-    // B1.5
+    // B1.5 Count words in a single document
     private void countWordsInSingleDocument(String key, String value){
         String[] words = value.split(" ");
         System.out.println(key + " has " + words.length + " words");
     }
 
-    // B1.6
+    // B1.6 Save document HashMap to JSON using JSONIOHelper
     private void saveDocumentsToJSON(String filename){
         JSONIOHelper jsonIO = new JSONIOHelper();
         jsonIO.createBasicJSONStructure();
